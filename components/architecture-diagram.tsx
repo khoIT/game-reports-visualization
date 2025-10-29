@@ -532,7 +532,7 @@ export default function ArchitectureDiagram() {
                 {conn.label && (
                   <text
                     x={(fromX + toX) / 2}
-                    y={(fromY + toY) / 2 - 5}
+                    y={(fromY + toY) / 2 - 8}
                     textAnchor="middle"
                     fill="#7c3aed"
                     fontSize="10"
@@ -625,17 +625,6 @@ export default function ArchitectureDiagram() {
 
           const pathD = `M ${fromX} ${fromY} Q ${controlX} ${controlY} ${toX} ${toY}`
 
-          // Calculate label position along the curve (at t=0.5 on quadratic bezier)
-          // Q(t) = (1-t)²P0 + 2(1-t)tP1 + t²P2
-          const t = 0.5
-          const labelX = (1-t)*(1-t)*fromX + 2*(1-t)*t*controlX + t*t*toX
-          const labelY = (1-t)*(1-t)*fromY + 2*(1-t)*t*controlY + t*t*toY
-          
-          // Offset perpendicular to edge for better visibility
-          const edgeAngle = Math.atan2(toY - fromY, toX - fromX)
-          const labelOffsetX = -Math.sin(edgeAngle) * 10
-          const labelOffsetY = Math.cos(edgeAngle) * 10
-
           // Determine arrow color based on connection type
           const isDataIngestion = conn.from === "ingestion" && conn.to === "kb"
           const isTriggerFlow = conn.from === "trigger" && conn.to === "agent"
@@ -672,8 +661,8 @@ export default function ArchitectureDiagram() {
               {/* Label */}
               {conn.label && (
                 <text
-                  x={labelX + labelOffsetX}
-                  y={labelY + labelOffsetY - 5}
+                  x={midX}
+                  y={midY - 8}
                   textAnchor="middle"
                   fill={textColor}
                   fontSize="10"
