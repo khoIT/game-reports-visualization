@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 AI-Powered Game Publishing Reports</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 16px;
+        }
+
+        .title-icon {
+            font-size: 40px;
+        }
+
+        .badges {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .badge {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-ai {
+            background: #667eea;
+            color: white;
+        }
+
+        .badge-automated {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .badge-template {
+            background: #10b981;
+            color: white;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 14px;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0;
+            border-bottom: 2px solid #e2e8f0;
+            margin-bottom: 40px;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            color: #718096;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab:hover {
+            color: #4a5568;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .diagram-container {
+            position: relative;
+            min-height: 650px;
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        .diagram-canvas {
+            position: relative;
+            min-width: 1600px;
+            height: 650px;
+        }
+
+        /* SVG for arrows */
+        #arrow-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .arrow-path {
+            fill: none;
+            stroke-width: 2;
+            stroke-dasharray: 8, 4;
+            opacity: 0.5;
+        }
+
+        .arrow-path.blue { stroke: #3b82f6; }
+        .arrow-path.purple { stroke: #8b5cf6; }
+        .arrow-path.orange { stroke: #f59e0b; }
+        .arrow-path.green { stroke: #10b981; }
+
+        /* Node styles */
+        .node {
+            position: absolute;
+            border-radius: 12px;
+            padding: 16px 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            cursor: move;
+            user-select: none;
+            z-index: 10;
+            transition: all 0.3s ease;
+            min-width: 160px;
+        }
+
+        .node:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .node.dragging {
+            opacity: 0.8;
+            cursor: grabbing;
+            z-index: 100;
+        }
+
+        .node-icon {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+
+        .node-title {
+            font-weight: 700;
+            font-size: 13px;
+            margin-bottom: 6px;
+            line-height: 1.3;
+        }
+
+        .node-subtitle {
+            font-size: 10px;
+            opacity: 0.8;
+            line-height: 1.4;
+        }
+
+        /* Node color themes */
+        .node-yellow {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #92400e;
+            border: 2px solid #fbbf24;
+        }
+
+        .node-blue {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #1e40af;
+            border: 2px solid #3b82f6;
+        }
+
+        .node-purple {
+            background: linear-gradient(135deg, #e9d5ff 0%, #d8b4fe 100%);
+            color: #6b21a8;
+            border: 2px solid #8b5cf6;
+        }
+
+        .node-green {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: #065f46;
+            border: 2px solid #10b981;
+        }
+
+        .node-pink {
+            background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%);
+            color: #9f1239;
+            border: 2px solid #ec4899;
+        }
+
+        .node-cyan {
+            background: linear-gradient(135deg, #cffafe 0%, #a5f3fc 100%);
+            color: #155e75;
+            border: 2px solid #06b6d4;
+        }
+
+        .node-gray {
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            color: #374151;
+            border: 2px dashed #9ca3af;
+        }
+
+        /* Arrow labels */
+        .arrow-label {
+            position: absolute;
+            font-size: 9px;
+            color: #6b7280;
+            font-weight: 600;
+            background: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid #e5e7eb;
+            z-index: 2;
+            white-space: nowrap;
+        }
+
+        /* Start circles */
+        .arrow-start {
+            opacity: 0.6;
+        }
+
+        .arrow-start.blue { fill: #3b82f6; }
+        .arrow-start.purple { fill: #8b5cf6; }
+        .arrow-start.orange { fill: #f59e0b; }
+        .arrow-start.green { fill: #10b981; }
+
+        /* Small nodes (data sources) */
+        .node-small {
+            padding: 10px 16px;
+            min-width: 140px;
+        }
+
+        .node-small .node-title {
+            font-size: 11px;
+        }
+
+        /* Large nodes */
+        .node-large {
+            padding: 20px 24px;
+            min-width: 220px;
+        }
+
+        .node-large .node-icon {
+            font-size: 28px;
+        }
+
+        .node-large .node-title {
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1 class="title">
+                <span class="title-icon">🎮</span>
+                AI-Powered Game Publishing Reports
+            </h1>
+            <div class="badges">
+                <span class="badge badge-ai">AI Agents</span>
+                <span class="badge badge-automated">Automated</span>
+                <span class="badge badge-template">Template-Driven</span>
+            </div>
+            <p class="subtitle">
+                Intelligent report generation system for game publishing analytics. 
+                AI agents automatically process game data, apply custom templates, and generate comprehensive business insights—no manual intervention required.
+            </p>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('flow')">
+                📊 Report Generation Flow
+            </button>
+            <button class="tab" onclick="switchTab('config')">
+                ⚙️ Template Configuration
+            </button>
+        </div>
+
+        <!-- Flow Tab -->
+        <div id="flow-tab" class="tab-content active">
+            <div class="diagram-container">
+                <div class="diagram-canvas">
+                    <!-- SVG for arrows -->
+                    <svg id="arrow-svg">
+                        <defs>
+                            <marker id="arrowhead-blue" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+                                <path d="M 0 0 L 10 5 L 0 10 z" fill="#3b82f6" opacity="0.5" />
+                            </marker>
+                            <marker id="arrowhead-purple" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+                                <path d="M 0 0 L 10 5 L 0 10 z" fill="#8b5cf6" opacity="0.5" />
+                            </marker>
+                            <marker id="arrowhead-orange" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+                                <path d="M 0 0 L 10 5 L 0 10 z" fill="#f59e0b" opacity="0.5" />
+                            </marker>
+                            <marker id="arrowhead-green" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+                                <path d="M 0 0 L 10 5 L 0 10 z" fill="#10b981" opacity="0.5" />
+                            </marker>
+                        </defs>
+                    </svg>
+
+                    <!-- Data Source Nodes (Left) -->
+                    <div class="node node-small node-yellow" data-id="source1" style="top: 30px; left: 30px;">
+                        <div class="node-icon">🎮</div>
+                        <div class="node-title">Game Key Metrics</div>
+                    </div>
+
+                    <div class="node node-small node-yellow" data-id="source2" style="top: 100px; left: 30px;">
+                        <div class="node-icon">💳</div>
+                        <div class="node-title">Payment Billing</div>
+                    </div>
+
+                    <div class="node node-small node-yellow" data-id="source3" style="top: 170px; left: 30px;">
+                        <div class="node-icon">🎫</div>
+                        <div class="node-title">CS Tickets</div>
+                    </div>
+
+                    <div class="node node-small node-yellow" data-id="source4" style="top: 240px; left: 30px;">
+                        <div class="node-icon">📱</div>
+                        <div class="node-title">Social Performance</div>
+                    </div>
+
+                    <div class="node node-small node-yellow" data-id="source5" style="top: 310px; left: 30px;">
+                        <div class="node-icon">📰</div>
+                        <div class="node-title">News & Events</div>
+                    </div>
+
+                    <div class="node node-small node-yellow" data-id="source6" style="top: 380px; left: 30px;">
+                        <div class="node-icon">📈</div>
+                        <div class="node-title">Promotion / Growth</div>
+                    </div>
+
+                    <div class="node node-small node-yellow" data-id="source7" style="top: 450px; left: 30px;">
+                        <div class="node-icon">📣</div>
+                        <div class="node-title">Marketing / Campaign</div>
+                    </div>
+
+                    <div class="node node-small node-gray" data-id="rawdata" style="top: 530px; left: 30px;">
+                        <div class="node-title">Raw Data Layer</div>
+                        <div class="node-subtitle">(timestamp, attributes)</div>
+                    </div>
+
+                    <!-- Data Collection (Center-Left) -->
+                    <div class="node node-large node-blue" data-id="collection" style="top: 220px; left: 220px;">
+                        <div class="node-icon">📊</div>
+                        <div class="node-title">Data Collection & Normalization</div>
+                        <div class="node-subtitle">
+                            Data pipeline, storage layer<br>
+                            (SQL database, vector stores)
+                        </div>
+                    </div>
+
+                    <!-- Curated Knowledge Base (Top Center) -->
+                    <div class="node node-large node-purple" data-id="kb" style="top: 30px; left: 520px;">
+                        <div class="node-icon">🗄️</div>
+                        <div class="node-title">Curated Knowledge Base</div>
+                        <div class="node-subtitle">
+                            Structured curated<br>
+                            knowledge base<br>
+                            vocabulary + ontology
+                        </div>
+                    </div>
+
+                    <!-- Report Template (Center) -->
+                    <div class="node node-yellow" data-id="template" style="top: 260px; left: 520px;">
+                        <div class="node-icon">📋</div>
+                        <div class="node-title">Report Template</div>
+                        <div class="node-subtitle">
+                            (Report Template 1,<br>
+                            Game ID = Foxus1)
+                        </div>
+                    </div>
+
+                    <!-- AI Agent (LLM) (Center-Right) -->
+                    <div class="node node-large node-purple" data-id="ai" style="top: 220px; left: 800px;">
+                        <div class="node-icon">🤖</div>
+                        <div class="node-title">AI Agent (LLM)</div>
+                        <div class="node-subtitle">
+                            SQL execution,<br>
+                            action research,<br>
+                            chain of thought
+                        </div>
+                    </div>
+
+                    <!-- Generated Report (Right) -->
+                    <div class="node node-green" data-id="report" style="top: 240px; left: 1080px;">
+                        <div class="node-icon">📄</div>
+                        <div class="node-title">Generated Report</div>
+                        <div class="node-subtitle">
+                            AI driven,<br>
+                            before statistics
+                        </div>
+                    </div>
+
+                    <!-- Report Summaries & Decisions (Top Right) -->
+                    <div class="node node-pink" data-id="summaries" style="top: 30px; left: 1320px;">
+                        <div class="node-icon">📈</div>
+                        <div class="node-title">Report Summaries & Decisions</div>
+                        <div class="node-subtitle">
+                            (Actions, observations)
+                        </div>
+                    </div>
+
+                    <!-- Game Operators (Far Right Top) -->
+                    <div class="node node-cyan" data-id="operators" style="top: 140px; left: 1320px;">
+                        <div class="node-icon">👥</div>
+                        <div class="node-title">Game Operators</div>
+                        <div class="node-subtitle">
+                            Feedback +<br>
+                            Data + Policy
+                        </div>
+                    </div>
+
+                    <!-- KB Evolution & Feedback (Bottom Right) -->
+                    <div class="node node-pink" data-id="kb-evolution" style="top: 450px; left: 1320px;">
+                        <div class="node-icon">🧠</div>
+                        <div class="node-title">KB Evolution & Feedback</div>
+                        <div class="node-subtitle">
+                            (FR knowledge,<br>
+                            approvals, mappings)
+                        </div>
+                    </div>
+
+                    <!-- Arrow Labels -->
+                    <div class="arrow-label" id="label-sources" style="top: 180px; left: 185px;">source1-7</div>
+                    <div class="arrow-label" id="label-structured" style="top: 165px; left: 370px;">structured + contextual</div>
+                    <div class="arrow-label" id="label-query" style="top: 140px; left: 700px;">use query</div>
+                    <div class="arrow-label" id="label-params" style="top: 270px; left: 680px;">use params</div>
+                    <div class="arrow-label" id="label-realtime" style="top: 310px; left: 540px;">retrieved in real-time</div>
+                    <div class="arrow-label" id="label-consume" style="top: 130px; left: 1220px;">use consume</div>
+                    <div class="arrow-label" id="label-enrich" style="top: 380px; left: 1220px;">use enrich</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Config Tab -->
+        <div id="config-tab" class="tab-content">
+            <div style="padding: 40px; text-align: center; color: #718096;">
+                <h3 style="margin-bottom: 12px;">Template Configuration</h3>
+                <p>Configure reusable templates with AI-powered blocks.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+            
+            if (tabName === 'flow') {
+                setTimeout(initializeArrows, 100);
+            }
+        }
+
+        // Arrow connections
+        const connections = [
+            { from: 'source1', to: 'collection', color: 'blue' },
+            { from: 'source2', to: 'collection', color: 'blue' },
+            { from: 'source3', to: 'collection', color: 'blue' },
+            { from: 'source4', to: 'collection', color: 'blue' },
+            { from: 'source5', to: 'collection', color: 'blue' },
+            { from: 'source6', to: 'collection', color: 'blue' },
+            { from: 'source7', to: 'collection', color: 'blue' },
+            { from: 'collection', to: 'kb', color: 'purple' },
+            { from: 'kb', to: 'template', color: 'purple' },
+            { from: 'kb', to: 'ai', color: 'purple' },
+            { from: 'template', to: 'ai', color: 'orange' },
+            { from: 'collection', to: 'ai', color: 'blue' },
+            { from: 'ai', to: 'report', color: 'green' },
+            { from: 'report', to: 'summaries', color: 'blue' },
+            { from: 'summaries', to: 'operators', color: 'blue' },
+            { from: 'report', to: 'kb-evolution', color: 'green' }
+        ];
+
+        function getNodeBounds(nodeId) {
+            const node = document.querySelector(`[data-id="${nodeId}"]`);
+            if (!node) return null;
+            
+            const rect = node.getBoundingClientRect();
+            const container = document.querySelector('.diagram-canvas');
+            const containerRect = container.getBoundingClientRect();
+            
+            return {
+                left: rect.left - containerRect.left,
+                right: rect.right - containerRect.left,
+                top: rect.top - containerRect.top,
+                bottom: rect.bottom - containerRect.top,
+                centerX: rect.left - containerRect.left + rect.width / 2,
+                centerY: rect.top - containerRect.top + rect.height / 2,
+                width: rect.width,
+                height: rect.height
+            };
+        }
+
+        function getConnectionPoints(fromBounds, toBounds) {
+            const fromCenter = { x: fromBounds.centerX, y: fromBounds.centerY };
+            const toCenter = { x: toBounds.centerX, y: toBounds.centerY };
+            
+            const dx = toCenter.x - fromCenter.x;
+            const dy = toCenter.y - fromCenter.y;
+            const angle = Math.atan2(dy, dx);
+            
+            let fromPoint = { x: fromCenter.x, y: fromCenter.y };
+            if (Math.abs(Math.cos(angle)) > Math.abs(Math.sin(angle))) {
+                if (dx > 0) {
+                    fromPoint.x = fromBounds.right;
+                    fromPoint.y = fromCenter.y;
+                } else {
+                    fromPoint.x = fromBounds.left;
+                    fromPoint.y = fromCenter.y;
+                }
+            } else {
+                if (dy > 0) {
+                    fromPoint.x = fromCenter.x;
+                    fromPoint.y = fromBounds.bottom;
+                } else {
+                    fromPoint.x = fromCenter.x;
+                    fromPoint.y = fromBounds.top;
+                }
+            }
+            
+            let toPoint = { x: toCenter.x, y: toCenter.y };
+            if (Math.abs(Math.cos(angle)) > Math.abs(Math.sin(angle))) {
+                if (dx > 0) {
+                    toPoint.x = toBounds.left;
+                    toPoint.y = toCenter.y;
+                } else {
+                    toPoint.x = toBounds.right;
+                    toPoint.y = toCenter.y;
+                }
+            } else {
+                if (dy > 0) {
+                    toPoint.x = toCenter.x;
+                    toPoint.y = toBounds.top;
+                } else {
+                    toPoint.x = toCenter.x;
+                    toPoint.y = toBounds.bottom;
+                }
+            }
+            
+            return { from: fromPoint, to: toPoint };
+        }
+
+        function drawArrow(connection) {
+            const fromBounds = getNodeBounds(connection.from);
+            const toBounds = getNodeBounds(connection.to);
+            
+            if (!fromBounds || !toBounds) return null;
+            
+            const points = getConnectionPoints(fromBounds, toBounds);
+            
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('class', `arrow-path ${connection.color}`);
+            path.setAttribute('marker-end', `url(#arrowhead-${connection.color})`);
+            
+            const dx = points.to.x - points.from.x;
+            const dy = points.to.y - points.from.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            const curvature = Math.min(distance * 0.15, 40);
+            const midX = (points.from.x + points.to.x) / 2;
+            const midY = (points.from.y + points.to.y) / 2;
+            
+            const perpX = -dy / distance * curvature;
+            const perpY = dx / distance * curvature;
+            
+            const controlX = midX + perpX * 0.2;
+            const controlY = midY + perpY * 0.2;
+            
+            const d = `M ${points.from.x} ${points.from.y} Q ${controlX} ${controlY} ${points.to.x} ${points.to.y}`;
+            path.setAttribute('d', d);
+            
+            const startCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            startCircle.setAttribute('cx', points.from.x);
+            startCircle.setAttribute('cy', points.from.y);
+            startCircle.setAttribute('r', '3');
+            startCircle.setAttribute('class', `arrow-start ${connection.color}`);
+            
+            return { path, startCircle };
+        }
+
+        function redrawArrows() {
+            const svg = document.getElementById('arrow-svg');
+            svg.querySelectorAll('.arrow-path, .arrow-start').forEach(el => el.remove());
+            
+            connections.forEach(connection => {
+                const elements = drawArrow(connection);
+                if (elements) {
+                    svg.appendChild(elements.path);
+                    svg.appendChild(elements.startCircle);
+                }
+            });
+        }
+
+        function initializeArrows() {
+            redrawArrows();
+        }
+
+        function makeDraggable() {
+            const nodes = document.querySelectorAll('.node');
+            
+            nodes.forEach(node => {
+                let isDragging = false;
+                let startX, startY, initialLeft, initialTop;
+                
+                node.addEventListener('mousedown', function(e) {
+                    isDragging = true;
+                    node.classList.add('dragging');
+                    
+                    startX = e.clientX;
+                    startY = e.clientY;
+                    
+                    const style = window.getComputedStyle(node);
+                    initialLeft = parseInt(style.left);
+                    initialTop = parseInt(style.top);
+                    
+                    e.preventDefault();
+                });
+                
+                document.addEventListener('mousemove', function(e) {
+                    if (!isDragging || !node.classList.contains('dragging')) return;
+                    
+                    const deltaX = e.clientX - startX;
+                    const deltaY = e.clientY - startY;
+                    
+                    node.style.left = (initialLeft + deltaX) + 'px';
+                    node.style.top = (initialTop + deltaY) + 'px';
+                    
+                    redrawArrows();
+                });
+                
+                document.addEventListener('mouseup', function() {
+                    if (isDragging) {
+                        isDragging = false;
+                        node.classList.remove('dragging');
+                    }
+                });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeArrows();
+            makeDraggable();
+        });
+    </script>
+</body>
+</html>
