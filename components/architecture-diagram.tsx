@@ -131,7 +131,7 @@ const NODES: NodeWithIcon[] = [
     label: "🗄️ Central Knowledge Base",
     description: ["(vector + relational store)", "- facts, metrics, events", "- embeddings + citations"],
     x: 580,
-    y: 70,
+    y: 130,
     width: 200,
     height: 130,
     type: "storage",
@@ -175,7 +175,7 @@ const NODES: NodeWithIcon[] = [
     label: "📄 Generated Report",
     description: ["(Charts, tables, narrative)"],
     x: 880,
-    y: 350,
+    y: 380,
     width: 140,
     height: 75,
     type: "output",
@@ -183,10 +183,10 @@ const NODES: NodeWithIcon[] = [
   // Game Operators (Bottom Right)
   {
     id: "operators",
-    label: "👥 Game Operators",
-    description: ["Producers / PMs", "Leads / Execs"],
-    x: 1100,
-    y: 340,
+    label: "👥 Game Ops/PM/Marketing",
+    description: ["making decision"],
+    x: 1180,
+    y: 380,
     width: 140,
     height: 80,
     type: "consumer",
@@ -194,13 +194,13 @@ const NODES: NodeWithIcon[] = [
   // Report Summaries (Top Right - Feedback Loop)
   {
     id: "summaries",
-    label: "📈 Report Summaries & Decisions",
+    label: "📈 KB Ingestion Hub (auto + human-in-the-loop)",
     description: ["(change logs, highlights, annotations)"],
     x: 930,
     y: 90,
     width: 165,
     height: 105,
-    type: "feedback",
+    type: "consumer",
   },
 ]
 
@@ -230,9 +230,9 @@ const CONNECTIONS: Connection[] = [
   // Agent to Guardrails
   { from: "agent", to: "guardrails", style: "dashed" },
   // Report to Operators
-  { from: "report", to: "operators", label: "review" },
+  { from: "report", to: "operators", label: "consume" },
   // Report to Summaries
-  { from: "report", to: "summaries", label: "auto-summarize", style: "dashed" },
+  { from: "report", to: "summaries", label: "review", style: "dashed" },
   // Summaries to KB
   { from: "summaries", to: "kb", label: "store as knowledge", style: "dashed" },
 ]
@@ -339,19 +339,105 @@ export default function ArchitectureDiagram() {
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseUp}
     >
+      {/* Flow Stage Ribbon */}
+      <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-r from-amber-50 via-purple-50 via-50% via-green-50 to-cyan-50 border-b-2 border-gray-200 flex items-center justify-between px-8 z-30">
+        {/* Stage 1: Data Sources */}
+        <div className="flex items-center gap-2 px-4 py-1.5 bg-white/80 backdrop-blur-sm rounded-lg border-2 border-amber-300 shadow-sm">
+          <div className="flex gap-1">
+            <span className="text-base">📁</span>
+            <span className="text-base">💾</span>
+          </div>
+          <span className="text-xs font-bold text-amber-700">Data Sources</span>
+        </div>
+
+        {/* Arrow */}
+        <div className="text-gray-400 text-xl">→</div>
+
+        {/* Stage 2: Intelligence (with glow) */}
+        <div className="flex items-center gap-2 px-4 py-1.5 bg-white/90 backdrop-blur-sm rounded-lg border-2 border-purple-400 shadow-lg ring-4 ring-purple-200 animate-pulse-subtle">
+          <div className="flex gap-1">
+            <span className="text-base">🤖</span>
+            <span className="text-base">⚙️</span>
+            <span className="text-base">🧠</span>
+          </div>
+          <span className="text-xs font-bold text-purple-700">Intelligent Automation</span>
+        </div>
+
+        {/* Arrow */}
+        <div className="text-gray-400 text-xl">→</div>
+
+        {/* Stage 3: Reports */}
+        <div className="flex items-center gap-2 px-4 py-1.5 bg-white/80 backdrop-blur-sm rounded-lg border-2 border-green-300 shadow-sm">
+          <div className="flex gap-1">
+            <span className="text-base">📊</span>
+            <span className="text-base">📄</span>
+          </div>
+          <span className="text-xs font-bold text-green-700">Reports</span>
+        </div>
+
+        {/* Arrow */}
+        <div className="text-gray-400 text-xl">→</div>
+
+        {/* Stage 4: Decisions */}
+        <div className="flex items-center gap-2 px-4 py-1.5 bg-white/80 backdrop-blur-sm rounded-lg border-2 border-cyan-300 shadow-sm">
+          <div className="flex gap-1">
+            <span className="text-base">👥</span>
+            <span className="text-base">💡</span>
+            <span className="text-base">📈</span>
+          </div>
+          <span className="text-xs font-bold text-cyan-700">Decisions & Actions</span>
+        </div>
+      </div>
+
+      {/* Custom CSS for subtle pulse animation */}
+      <style>{`
+        @keyframes pulse-subtle {
+          0%, 100% {
+            box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.4);
+          }
+          50% {
+            box-shadow: 0 0 15px 3px rgba(168, 85, 247, 0.3);
+          }
+        }
+        .animate-pulse-subtle {
+          animation: pulse-subtle 3s ease-in-out infinite;
+        }
+        @keyframes pulse-subtle-box {
+          0%, 100% {
+            box-shadow: 0 0 20px 0 rgba(168, 85, 247, 0.15), inset 0 0 30px rgba(168, 85, 247, 0.05);
+          }
+          50% {
+            box-shadow: 0 0 30px 5px rgba(168, 85, 247, 0.25), inset 0 0 40px rgba(168, 85, 247, 0.1);
+          }
+        }
+        .animate-pulse-subtle-box {
+          animation: pulse-subtle-box 4s ease-in-out infinite;
+        }
+      `}</style>
+
       {/* Data Sources Group Background */}
       <div
-        className="absolute bg-blue-50/30 backdrop-blur-sm rounded-2xl border-2 border-dashed border-blue-300/40"
+        className="absolute bg-amber-50/30 backdrop-blur-sm rounded-2xl border-2 border-dashed border-amber-300/40"
         style={{
           left: "20px",
-          top: "60px",
+          top: "75px",
           width: "150px",
-          height: "600px",
+          height: "585px",
         }}
       >
-        <div className="absolute -top-6 left-3 bg-white px-3 py-1 rounded-full border border-blue-300 text-xs font-bold text-blue-700">
-          Data Sources
-        </div>
+      </div>
+
+      {/* Intelligence Layer Highlight */}
+      <div
+        className="absolute bg-purple-50/20 backdrop-blur-sm rounded-3xl border-2 border-purple-300/40 animate-pulse-subtle-box"
+        style={{
+          left: "210px",
+          top: "75px",
+          width: "630px",
+          height: "563px",
+          pointerEvents: "none",
+        }}
+      >
       </div>
 
       {/* SVG for connections */}
@@ -389,7 +475,7 @@ export default function ArchitectureDiagram() {
         </defs>
 
         {/* Convergence point for data sources */}
-        <circle cx="205" cy="300" r="6" fill="#3b82f6" opacity="0.7" />
+        <circle cx="205" cy="300" r="6" fill="#a855f7" opacity="0.7" />
 
         {CONNECTIONS.map((conn, idx) => {
           // Handle convergence point specially
@@ -409,13 +495,13 @@ export default function ArchitectureDiagram() {
                   y1={fromY}
                   x2={toX}
                   y2={toY}
-                  stroke="#3b82f6"
+                  stroke="#a855f7"
                   strokeWidth="2"
                   strokeDasharray="8,4"
                   opacity="0.6"
                   className="animated-arrow"
                 />
-                <circle cx={fromX} cy={fromY} r="3" fill="#3b82f6" opacity="0.7" />
+                <circle cx={fromX} cy={fromY} r="3" fill="#a855f7" opacity="0.7" />
               </g>
             )
           }
@@ -434,21 +520,21 @@ export default function ArchitectureDiagram() {
               <g key={idx}>
                 <path
                   d={`M ${fromX} ${fromY} L ${toX} ${toY}`}
-                  stroke="#3b82f6"
+                  stroke="#a855f7"
                   strokeWidth="2.5"
                   strokeDasharray="8,4"
                   fill="none"
                   opacity="0.6"
-                  markerEnd="url(#arrowhead-blue)"
+                  markerEnd="url(#arrowhead-purple)"
                   className="animated-arrow"
                 />
-                <circle cx={fromX} cy={fromY} r="3" fill="#3b82f6" opacity="0.7" />
+                <circle cx={fromX} cy={fromY} r="3" fill="#a855f7" opacity="0.7" />
                 {conn.label && (
                   <text
                     x={(fromX + toX) / 2}
-                    y={(fromY + toY) / 2 - 8}
+                    y={(fromY + toY) / 2 - 5}
                     textAnchor="middle"
-                    fill="#1e40af"
+                    fill="#7c3aed"
                     fontSize="10"
                     fontWeight="600"
                     className="pointer-events-none"
@@ -539,17 +625,28 @@ export default function ArchitectureDiagram() {
 
           const pathD = `M ${fromX} ${fromY} Q ${controlX} ${controlY} ${toX} ${toY}`
 
+          // Calculate label position along the curve (at t=0.5 on quadratic bezier)
+          // Q(t) = (1-t)²P0 + 2(1-t)tP1 + t²P2
+          const t = 0.5
+          const labelX = (1-t)*(1-t)*fromX + 2*(1-t)*t*controlX + t*t*toX
+          const labelY = (1-t)*(1-t)*fromY + 2*(1-t)*t*controlY + t*t*toY
+          
+          // Offset perpendicular to edge for better visibility
+          const edgeAngle = Math.atan2(toY - fromY, toX - fromX)
+          const labelOffsetX = -Math.sin(edgeAngle) * 10
+          const labelOffsetY = Math.cos(edgeAngle) * 10
+
           // Determine arrow color based on connection type
           const isDataIngestion = conn.from === "ingestion" && conn.to === "kb"
           const isTriggerFlow = conn.from === "trigger" && conn.to === "agent"
           const isRAGRetrieval = conn.from === "kb" && conn.to === "agent"
           const isAnimated = isDataIngestion || isRAGRetrieval
           
-          const arrowColor = isDataIngestion ? "#3b82f6" : isTriggerFlow ? "#10b981" : isRAGRetrieval ? "#8b5cf6" : "#9ca3af"
-          const arrowMarker = isDataIngestion ? "url(#arrowhead-blue)" : isTriggerFlow ? "url(#arrowhead-green)" : isRAGRetrieval ? "url(#arrowhead-purple)" : "url(#arrowhead-gray)"
+          const arrowColor = isDataIngestion ? "#a855f7" : isTriggerFlow ? "#10b981" : isRAGRetrieval ? "#8b5cf6" : "#9ca3af"
+          const arrowMarker = isDataIngestion ? "url(#arrowhead-purple)" : isTriggerFlow ? "url(#arrowhead-green)" : isRAGRetrieval ? "url(#arrowhead-purple)" : "url(#arrowhead-gray)"
           const strokeWidth = (isDataIngestion || isTriggerFlow || isRAGRetrieval) ? "2.5" : "2"
           const opacity = (isDataIngestion || isTriggerFlow || isRAGRetrieval) ? "0.65" : "0.5"
-          const textColor = isDataIngestion ? "#1e40af" : isTriggerFlow ? "#059669" : isRAGRetrieval ? "#7c3aed" : "#6b7280"
+          const textColor = isDataIngestion ? "#7c3aed" : isTriggerFlow ? "#059669" : isRAGRetrieval ? "#7c3aed" : "#6b7280"
 
           return (
             <g key={idx}>
@@ -575,8 +672,8 @@ export default function ArchitectureDiagram() {
               {/* Label */}
               {conn.label && (
                 <text
-                  x={midX}
-                  y={midY - 8}
+                  x={labelX + labelOffsetX}
+                  y={labelY + labelOffsetY - 5}
                   textAnchor="middle"
                   fill={textColor}
                   fontSize="10"

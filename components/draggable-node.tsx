@@ -21,14 +21,21 @@ interface DraggableNodeProps {
   isBusinessMode?: boolean
 }
 
-const getNodeColor = (type: Node["type"]) => {
+const getNodeColor = (type: Node["type"], nodeId?: string) => {
+  // Intelligence layer nodes (purple/violet) - excluding observability and guardrails
+  const intelligenceNodes = ["ingestion", "kb", "trigger", "agent"]
+  if (nodeId && intelligenceNodes.includes(nodeId)) {
+    return "bg-gradient-to-br from-purple-100 to-purple-200 border-purple-400 text-purple-900"
+  }
+  
+  // Data sources (amber/gold)
   switch (type) {
     case "source":
-      return "bg-gradient-to-br from-yellow-100 to-yellow-200 border-yellow-400 text-yellow-900"
+      return "bg-gradient-to-br from-amber-100 to-amber-200 border-amber-400 text-amber-900"
+    case "storage":
+      return "bg-gradient-to-br from-amber-100 to-amber-200 border-amber-400 text-amber-900"
     case "process":
       return "bg-gradient-to-br from-blue-100 to-blue-200 border-blue-400 text-blue-900"
-    case "storage":
-      return "bg-gradient-to-br from-purple-100 to-purple-200 border-purple-400 text-purple-900"
     case "ai":
       return "bg-gradient-to-br from-indigo-100 to-indigo-200 border-indigo-500 text-indigo-900"
     case "output":
@@ -63,11 +70,11 @@ export default function DraggableNode({ node, onMouseDown, onMouseUp, isDragging
       <div
         className={`
           h-full rounded-xl p-4
-          ${getNodeColor(node.type)}
+          ${getNodeColor(node.type, node.id)}
           ${isDragging ? "shadow-2xl cursor-grabbing" : "hover:shadow-lg hover:-translate-y-0.5"}
           ${isOutstanding ? "border-[3px] shadow-xl ring-4 ring-opacity-30" : "border-2 shadow-md"}
-          ${node.id === "agent" ? "ring-indigo-400" : node.id === "kb" ? "ring-purple-400" : ""}
-          ${isBusinessMode ? "ring-2 ring-offset-2 ring-blue-500" : ""}
+          ${node.id === "agent" ? "ring-purple-400" : node.id === "kb" ? "ring-purple-400" : ""}
+          ${isBusinessMode ? "ring-2 ring-offset-2 ring-purple-500" : ""}
           transition-all duration-300 cursor-move
         `}
       >
